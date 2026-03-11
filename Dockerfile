@@ -1,28 +1,21 @@
-# ─── Stage 1: Build ──────────────────────────────────────────────────────────
-FROM python:3.12-slim AS builder
+FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
+# Install Poetry
 RUN pip install --no-cache-dir poetry==1.8.3
 
+# Copy dependency manifest only (cache layer)
 COPY pyproject.toml ./
 
-RUN poetry config virtualenvs.in-project true \
+# Install dependencies directly into the system Python (no venv needed in Docker)
+RUN poetry config virtualenvs.create false \
     && poetry install --only main --no-root --no-interaction
 
-# ─── Stage 2: Runtime ────────────────────────────────────────────────────────
-FROM python:3.12-slim AS runtime
-
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PATH="/app/.venv/bin:$PATH"
-
-WORKDIR /app
-
-COPY --from=builder /app/.venv /app/.venv
+# Copy application code
 COPY . .
 
 RUN addgroup --system appgroup \
