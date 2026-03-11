@@ -120,6 +120,11 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "API RESTful para gestão de profissionais de saúde e consultas médicas.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "TAGS": [
+        {"name": "Autenticação", "description": "Obtenção e renovação de tokens JWT"},
+        {"name": "Profissionais", "description": "CRUD de profissionais de saúde"},
+        {"name": "Consultas", "description": "CRUD de consultas médicas. Filtre por profissional com `?professional=<uuid>`"},
+    ],
 }
 
 # ─── Logging ─────────────────────────────────────────────────────────────────
