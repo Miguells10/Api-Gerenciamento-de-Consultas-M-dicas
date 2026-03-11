@@ -1,0 +1,295 @@
+# API Gerenciamento de Consultas Médicas
+
+> API RESTful para gerenciamento de profissionais de saúde e consultas médicas, com impacto social.
+
+---
+
+## 📋 Sobre o Projeto
+
+Esta API foi desenvolvida com **Python + Django + Django REST Framework (DRF)**, seguindo boas práticas de arquitetura limpa, segurança e testabilidade. Permite o gerenciamento completo de profissionais de saúde e consultas médicas, com autenticação JWT e documentação interativa Swagger.
+
+---
+
+## 🛠 Tecnologias Utilizadas
+
+| Tecnologia | Finalidade |
+|---|---|
+| Python 3.12 | Linguagem principal |
+| Django 5.1 | Framework web |
+| Django REST Framework | Construção da API REST |
+| djangorestframework-simplejwt | Autenticação JWT |
+| django-cors-headers | Configuração de CORS |
+| django-filter | Filtragem de endpoints |
+| drf-spectacular | Documentação OpenAPI/Swagger |
+| PostgreSQL 15 | Banco de dados |
+| Poetry | Gerenciamento de dependências |
+| Docker + Docker Compose | Containerização |
+| GitHub Actions | CI/CD |
+
+---
+
+## ✅ Pré-requisitos
+
+- [Python 3.12+](https://python.org)
+- [Poetry](https://python-poetry.org/docs/#installation)
+- [Docker + Docker Compose](https://docs.docker.com/compose/install/) *(opcional)*
+
+---
+
+## 🚀 Instalação Local (sem Docker)
+
+### 1. Clone o repositório
+
+```bash
+git clone https://github.com/seu-usuario/api-gerenciamento-consultas-medicas.git
+cd api-gerenciamento-consultas-medicas
+```
+
+### 2. Configure as variáveis de ambiente
+
+```bash
+cp .env.example .env
+# Edite o arquivo .env com seus valores
+```
+
+### 3. Instale as dependências
+
+```bash
+poetry install
+```
+
+### 4. Execute as migrações
+
+```bash
+poetry run python manage.py migrate
+```
+
+### 5. Crie um superusuário (para acessar o admin e obter tokens JWT)
+
+```bash
+poetry run python manage.py createsuperuser
+```
+
+### 6. Inicie o servidor de desenvolvimento
+
+```bash
+poetry run python manage.py runserver
+```
+
+A API estará disponível em `http://localhost:8000`.
+
+---
+
+## 🐳 Execução com Docker
+
+### 1. Configure o arquivo `.env`
+
+```bash
+cp .env.example .env
+# Edite o .env conforme necessário
+```
+
+### 2. Suba os containers
+
+```bash
+docker compose up --build
+```
+
+A API estará disponível em `http://localhost:8000`.
+
+### 3. Crie um superusuário (em outro terminal)
+
+```bash
+docker compose exec web python manage.py createsuperuser
+```
+
+---
+
+## 🔑 Autenticação JWT
+
+Todos os endpoints (exceto `/api/docs/`) requerem autenticação via **Bearer Token**.
+
+### Obter token de acesso
+
+```bash
+POST /api/v1/auth/token/
+Content-Type: application/json
+
+{
+  "username": "seu_usuario",
+  "password": "sua_senha"
+}
+```
+
+**Resposta:**
+```json
+{
+  "access": "eyJ...",
+  "refresh": "eyJ..."
+}
+```
+
+### Renovar token
+
+```bash
+POST /api/v1/auth/token/refresh/
+Content-Type: application/json
+
+{
+  "refresh": "eyJ..."
+}
+```
+
+### Usar o token nas requisições
+
+```bash
+Authorization: Bearer <access_token>
+```
+
+---
+
+## 📡 Endpoints da API
+
+### Profissionais de Saúde
+
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `GET` | `/api/v1/professionals/` | Listar todos os profissionais |
+| `POST` | `/api/v1/professionals/` | Cadastrar novo profissional |
+| `GET` | `/api/v1/professionals/{id}/` | Detalhar profissional |
+| `PUT` | `/api/v1/professionals/{id}/` | Atualizar profissional (completo) |
+| `PATCH` | `/api/v1/professionals/{id}/` | Atualizar profissional (parcial) |
+| `DELETE` | `/api/v1/professionals/{id}/` | Remover profissional |
+
+**Exemplo de payload (POST/PUT):**
+```json
+{
+  "social_name": "Dra. Ana Lima",
+  "profession": "Cardiologista",
+  "address": "Rua das Flores, 123, São Paulo - SP",
+  "contact": "+5511999999999"
+}
+```
+
+### Consultas Médicas
+
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `GET` | `/api/v1/appointments/` | Listar todas as consultas |
+| `GET` | `/api/v1/appointments/?professional={id}` | **Filtrar por profissional** |
+| `POST` | `/api/v1/appointments/` | Agendar nova consulta |
+| `GET` | `/api/v1/appointments/{id}/` | Detalhar consulta |
+| `PATCH` | `/api/v1/appointments/{id}/` | Atualizar consulta (ex: status) |
+| `DELETE` | `/api/v1/appointments/{id}/` | Cancelar consulta |
+
+**Exemplo de payload (POST):**
+```json
+{
+  "professional": "uuid-do-profissional",
+  "date": "2026-04-15T10:00:00-03:00"
+}
+```
+
+**Status disponíveis:** `SCHEDULED`, `COMPLETED`, `CANCELED`
+
+---
+
+## 📖 Documentação Interativa (Swagger)
+
+Após iniciar o servidor, acesse:
+
+- **Swagger UI:** `http://localhost:8000/api/docs/`
+- **Schema OpenAPI (JSON):** `http://localhost:8000/api/schema/`
+
+---
+
+## 🧪 Testes
+
+### Executar todos os testes
+
+```bash
+# Local (com Poetry)
+poetry run python manage.py test --verbosity=2
+
+# Docker
+docker compose exec web python manage.py test --verbosity=2
+```
+
+### Executar com cobertura de código
+
+```bash
+poetry run coverage run manage.py test
+poetry run coverage report
+poetry run coverage html  # Gera relatório HTML em htmlcov/
+```
+
+---
+
+## 🏛 Justificativas Técnicas
+
+| Decisão | Justificativa |
+|---|---|
+| **Django + DRF** | Iteração rápida, ORM robusto, proteção nativa contra SQLi/CSRF e ecossistema maduro |
+| **JWT (stateless)** | Facilita escalabilidade horizontal no AWS; funciona para web e mobile |
+| **UUID como PK** | Previne enumeração de IDs e ataques de IDOR |
+| **PROTECT no FK** | Evita deletar profissionais com consultas ativas acidentalmente |
+| **`select_related`** | Previne queries N+1 nas listagens de consultas |
+| **Poetry** | Builds determinísticos, lock file garante paridade dev/produção |
+| **Docker multi-stage** | Imagem de produção enxuta sem dependências de build |
+| **Blue/Green deploy** | Rollback instantâneo sem downtime |
+
+---
+
+## 🔄 Estratégia de Rollback (Blue/Green)
+
+O pipeline de CI/CD implementa **Blue/Green Deployment** no AWS ECS:
+
+1. O novo código (`Green`) é implantado como nova task definition
+2. Health checks validam que o ambiente Green está saudável
+3. O tráfego é transferido do `Blue` para o `Green`
+4. Em caso de falha → tráfego volta automaticamente para `Blue`
+5. Para rollback manual: re-execute o workflow da tag/commit anterior no GitHub Actions
+
+---
+
+## 💳 Integração Asaas (Arquitetura — Bônus)
+
+A integração com o **Asaas** para split de pagamentos segue este fluxo:
+
+```
+Paciente paga consulta
+    │
+    ▼
+Django API → Asaas API (cria cobrança com split)
+    │
+    ├── Plataforma recebe: % de taxa de serviço
+    └── Profissional recebe: % restante (wallet do Asaas)
+
+Asaas envia webhook → POST /api/v1/webhooks/asaas/
+    └── Django atualiza status da consulta para PAID
+```
+
+**Endpoint webhook** (protegido por token Asaas, sem JWT):
+```
+POST /api/v1/webhooks/asaas/
+X-Asaas-Token: <token_secreto_do_asaas>
+```
+
+---
+
+## 📁 Estrutura do Projeto
+
+```
+api-gerenciamento-consultas-medicas/
+├── config/             # Configurações Django
+├── apps/
+│   ├── core/           # Modelos base (TimestampedModel)
+│   ├── professionals/  # CRUD profissionais
+│   ├── appointments/   # CRUD consultas
+│   └── auth/           # JWT endpoints
+├── .github/workflows/  # CI/CD GitHub Actions
+├── Dockerfile
+├── docker-compose.yml
+├── pyproject.toml
+└── .env.example
+```
