@@ -1,0 +1,77 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Create Test Environment Variables
+        run: |
+          echo "POSTGRES_DB=consultas_medicas" >> .env
+          echo "POSTGRES_USER=postgres" >> .env
+          echo "POSTGRES_PASSWORD=postgres" >> .env
+          echo "POSTGRES_HOST=db" >> .env
+          echo "POSTGRES_PORT=5432" >> .env
+          echo "CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000" >> .env
+
+      - name: Start Docker Environment
+        run: docker compose up -d
+
+      - name: Wait for Database
+        run: sleep 15
+
+      - name: Run Django Tests
+        run: docker compose exec -T web python manage.py test apps --noinput
+
+      - name: Stop Docker Environment
+        if: always()
+        run: docker compose down
+
+  deploy:
+    name: Deploy to AWS EC2
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd Api-Gerenciamento-de-Consultas-M-dicas || (git clone https://github.com/Miguells10/Api-Gerenciamento-de-Consultas-M-dicas.git && cd Api-Gerenciamento-de-Consultas-M-dicas)
+            git config --global --add safe.directory /home/${{ secrets.EC2_USERNAME }}/Api-Gerenciamento-de-Consultas-M-dicas
+            git pull origin main
+            
+            # Create .env from secrets (Ensuring secure config on server)
+            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > .env
+            echo "DEBUG=False" >> .env
+            echo "ALLOWED_HOSTS=${{ secrets.EC2_HOST }},localhost,127.0.0.1" >> .env
+            echo "DATABASE_URL=postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@db:5432/${{ secrets.POSTGRES_DB }}" >> .env
+            echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+            echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+            echo "CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}" >> .env
+            echo "ACCESS_TOKEN_LIFETIME=${{ secrets.ACCESS_TOKEN_LIFETIME }}" >> .env
+            echo "REFRESH_TOKEN_LIFETIME=${{ secrets.REFRESH_TOKEN_LIFETIME }}" >> .env
+            
+            # Rebuild and restart services
+            docker compose down
+            docker compose up -d --build
+            
+            # Apply any pending migrations
+            docker compose exec -T web python manage.py migrate
