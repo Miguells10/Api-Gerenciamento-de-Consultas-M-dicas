@@ -27,10 +27,13 @@ jobs:
           echo "CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000" >> .env
 
       - name: Start Docker Environment
-        run: docker compose up -d
+        run: docker compose up -d --build
 
-      - name: Wait for Database
-        run: sleep 15
+      - name: Wait for Database and Web service
+        run: |
+          sleep 15
+          docker compose ps
+          docker compose logs web
 
       - name: Run Django Tests
         run: docker compose exec -T web python manage.py test apps --noinput
