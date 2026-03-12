@@ -3,10 +3,10 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   test:
@@ -43,7 +43,7 @@ jobs:
     name: Deploy to AWS EC2
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     
     steps:
       - name: Deploy via SSH
@@ -55,7 +55,7 @@ jobs:
           script: |
             cd Api-Gerenciamento-de-Consultas-M-dicas || (git clone https://github.com/Miguells10/Api-Gerenciamento-de-Consultas-M-dicas.git && cd Api-Gerenciamento-de-Consultas-M-dicas)
             git config --global --add safe.directory /home/${{ secrets.EC2_USERNAME }}/Api-Gerenciamento-de-Consultas-M-dicas
-            git pull origin main
+            git pull origin master
             
             # Create .env from secrets (Ensuring secure config on server)
             echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > .env
