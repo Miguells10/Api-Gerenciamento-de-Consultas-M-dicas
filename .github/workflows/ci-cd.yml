@@ -94,7 +94,7 @@ jobs:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ github.ref == 'refs/heads/master' && secrets.EC2_HOST_PROD || secrets.EC2_HOST_STAGING }}
+          host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
@@ -114,10 +114,10 @@ jobs:
             # Update .env
             echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > .env
             echo "DEBUG=False" >> .env
-            echo "ALLOWED_HOSTS=${{ github.ref == 'refs/heads/master' && secrets.EC2_HOST_PROD || secrets.EC2_HOST_STAGING }},localhost,127.0.0.1" >> .env
-            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "ALLOWED_HOSTS=${{ secrets.EC2_HOST }},localhost,127.0.0.1" >> .env
+            echo "DB_NAME=${{ secrets.POSTGRES_DB }}" >> .env
+            echo "DB_USER=${{ secrets.POSTGRES_USER }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
             echo "DB_HOST=db" >> .env
             echo "DB_PORT=5432" >> .env
             
