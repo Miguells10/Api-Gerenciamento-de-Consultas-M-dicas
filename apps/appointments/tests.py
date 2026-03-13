@@ -26,14 +26,12 @@ class AppointmentAPITestCase(APITestCase):
         }
 
     def test_create_appointment_success(self):
-        """Test creating an appointment with valid data."""
         response = self.client.post(self.list_url, self.valid_payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Appointment.objects.count(), 1)
         self.assertEqual(Appointment.objects.get().professional, self.professional)
 
     def test_create_appointment_past_date(self):
-        """Test creating an appointment with a date in the past."""
         past_date = (timezone.now() - timezone.timedelta(days=1)).isoformat()
         payload = self.valid_payload.copy()
         payload["date"] = past_date
@@ -43,7 +41,6 @@ class AppointmentAPITestCase(APITestCase):
         self.assertEqual(Appointment.objects.count(), 0)
 
     def test_create_appointment_missing_professional(self):
-        """Test creating an appointment without a professional."""
         payload = {"date": self.future_date.isoformat()}
         response = self.client.post(self.list_url, payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -51,7 +48,6 @@ class AppointmentAPITestCase(APITestCase):
         self.assertEqual(Appointment.objects.count(), 0)
 
     def test_list_appointments(self):
-        """Test listing appointments."""
         Appointment.objects.create(
             professional=self.professional,
             date=self.future_date
@@ -61,7 +57,6 @@ class AppointmentAPITestCase(APITestCase):
         self.assertEqual(len(response.data["results"] if "results" in response.data else response.data), 1)
 
     def test_retrieve_appointment(self):
-        """Test retrieving a single appointment."""
         appointment = Appointment.objects.create(
             professional=self.professional,
             date=self.future_date
@@ -72,7 +67,6 @@ class AppointmentAPITestCase(APITestCase):
         self.assertEqual(str(response.data["professional"]), str(self.professional.id))
 
     def test_update_appointment_status(self):
-        """Test updating an appointment's status."""
         appointment = Appointment.objects.create(
             professional=self.professional,
             date=self.future_date
@@ -85,7 +79,6 @@ class AppointmentAPITestCase(APITestCase):
         self.assertEqual(appointment.status, AppointmentStatus.COMPLETED)
 
     def test_delete_appointment(self):
-        """Test canceling/deleting an appointment."""
         appointment = Appointment.objects.create(
             professional=self.professional,
             date=self.future_date
@@ -96,7 +89,6 @@ class AppointmentAPITestCase(APITestCase):
         self.assertEqual(Appointment.objects.count(), 0)
 
     def test_professional_protection(self):
-        """Test that a professional cannot be deleted if they have appointments."""
         Appointment.objects.create(
             professional=self.professional,
             date=self.future_date
@@ -104,3 +96,15 @@ class AppointmentAPITestCase(APITestCase):
         from django.db.models import ProtectedError
         with self.assertRaises(ProtectedError):
             self.professional.delete()
+
+    def test_unauthenticated_appointment_creation(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.post(self.list_url, self.valid_payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_create_appointment_invalid_professional_uuid(self):
+        payload = self.valid_payload.copy()
+        payload["professional"] = str(uuid.uuid4())
+        response = self.client.post(self.list_url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("professional", response.data)

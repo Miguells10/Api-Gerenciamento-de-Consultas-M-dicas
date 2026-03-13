@@ -2,98 +2,127 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - master
+    branches: [master, develop]
   pull_request:
-    branches:
-      - master
+    branches: [master, develop]
 
 jobs:
-  test:
-    name: Run Tests
+  quality:
+    name: Lint & Format Check
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create Test Environment Variables
-        run: |
-          echo "POSTGRES_DB=consultas_medicas" >> .env
-          echo "POSTGRES_USER=postgres" >> .env
-          echo "POSTGRES_PASSWORD=postgres" >> .env
-          echo "POSTGRES_HOST=db" >> .env
-          echo "POSTGRES_PORT=5432" >> .env
-          echo "CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000" >> .env
-          echo "SECRET_KEY=test-secret-key-12345" >> .env
-          echo "ALLOWED_HOSTS=*" >> .env
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-      - name: Start Docker Environment
-        run: docker compose up -d --build
+      - name: Install Poetry
+        run: pip install poetry==1.8.3
 
-      - name: Wait for services to be up (fail with logs if web is down)
-        run: |
-          set -euxo pipefail
-          docker compose ps
-          # Show logs early for easier debugging
-          docker compose logs --no-color --tail=200 db || true
-          docker compose logs --no-color --tail=200 web || true
+      - name: Install dependencies
+        run: poetry install --no-root
 
-      - name: Run Django Tests
-        run: docker compose run --rm web python manage.py test apps --noinput
+      - name: Run Ruff check
+        run: poetry run ruff check .
 
-      - name: Stop Docker Environment
-        if: always()
-        run: docker compose down
+      - name: Check formatting with Black
+        run: poetry run black --check .
+
+  test:
+    name: Automated Tests
+    runs-on: ubuntu-latest
+    needs: quality
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: consultas_medicas_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      SECRET_KEY: ci-secret-key-not-for-production
+      DEBUG: "False"
+      ALLOWED_HOSTS: localhost
+      DB_NAME: consultas_medicas_test
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: localhost
+      DB_PORT: "5432"
+      CORS_ALLOWED_ORIGINS: ""
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        run: pip install poetry==1.8.3
+
+      - name: Install dependencies
+        run: poetry install --no-root
+
+      - name: Run tests with coverage
+        run: poetry run coverage run manage.py test apps --verbosity=2
+
+      - name: Report coverage
+        run: poetry run coverage report --fail-under=80
 
   deploy:
-    name: Deploy to AWS EC2
+    name: Deploy
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')
+    environment:
+      name: ${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
     
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_HOST }}
+          host: ${{ github.ref == 'refs/heads/master' && secrets.EC2_HOST_PROD || secrets.EC2_HOST_STAGING }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            if ! command -v docker &> /dev/null; then
-                sudo apt-get update
-                sudo apt-get install -y docker.io docker-compose-v2 git
-                sudo usermod -aG docker ubuntu
-            fi
-
-            if ! sudo swapon --show | grep -q '/swapfile'; then
-                sudo fallocate -l 1G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=1024
-                sudo chmod 600 /swapfile
-                sudo mkswap /swapfile
-                sudo swapon /swapfile
-                echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-            fi
-
-            if [ ! -d "Api-Gerenciamento-de-Consultas-Medicas" ]; then
-                git clone https://github.com/Miguells10/Api-Gerenciamento-de-Consultas-Medicas.git
-            fi
-            cd Api-Gerenciamento-de-Consultas-Medicas
+            # Determine directory and secrets
+            APP_DIR="Api-Gerenciamento-de-Consultas-Medicas"
+            BRANCH="${{ github.ref_name }}"
             
-            git config --global --add safe.directory /home/${{ secrets.EC2_USERNAME }}/Api-Gerenciamento-de-Consultas-Medicas
-            git pull origin master
+            if [ ! -d "$APP_DIR" ]; then
+                git clone https://github.com/Miguells10/Api-Gerenciamento-de-Consultas-Medicas.git "$APP_DIR"
+            fi
+            cd "$APP_DIR"
             
+            git fetch origin
+            git checkout "$BRANCH"
+            git pull origin "$BRANCH"
+            
+            # Update .env
             echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > .env
             echo "DEBUG=False" >> .env
-            echo "ALLOWED_HOSTS=${{ secrets.EC2_HOST }},localhost,127.0.0.1" >> .env
-            echo "DATABASE_URL=postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@db:5432/${{ secrets.POSTGRES_DB }}" >> .env
-            echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
-            echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
-            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
-            echo "CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}" >> .env
-            echo "ACCESS_TOKEN_LIFETIME=${{ secrets.ACCESS_TOKEN_LIFETIME }}" >> .env
-            echo "REFRESH_TOKEN_LIFETIME=${{ secrets.REFRESH_TOKEN_LIFETIME }}" >> .env
-            sudo docker compose down -v || true
-            sudo docker volume rm api-gerenciamento-de-consultas-medicas_postgres_data || true
-            sudo docker compose up -d --build
+            echo "ALLOWED_HOSTS=${{ github.ref == 'refs/heads/master' && secrets.EC2_HOST_PROD || secrets.EC2_HOST_STAGING }},localhost,127.0.0.1" >> .env
+            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "DB_HOST=db" >> .env
+            echo "DB_PORT=5432" >> .env
             
+            # Restart with zero-downtime attempt (simple version: pull before restart)
+            sudo docker compose pull
+            sudo docker compose up -d --build
             sudo docker compose exec -T web python manage.py migrate
+            sudo docker image prune -f

@@ -83,3 +83,9 @@ class ProfessionalAPITestCase(APITestCase):
         response = self.client.delete(url, format="json")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Professional.objects.count(), 0)
+
+    def test_unauthenticated_access(self):
+        """Test that unauthenticated users cannot list professionals."""
+        self.client.force_authenticate(user=None)
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
