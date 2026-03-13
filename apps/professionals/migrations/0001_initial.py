@@ -3,7 +3,6 @@
 import uuid
 from django.db import migrations, models
 
-
 class Migration(migrations.Migration):
 
     initial = True
@@ -18,7 +17,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('id', models.UUIDField(
-                    default=uuid.uuid4, editable=False, 
+                    default=uuid.uuid4, editable=False,
                     primary_key=True, serialize=False
                 )),
                 ('social_name', models.CharField(max_length=255)),

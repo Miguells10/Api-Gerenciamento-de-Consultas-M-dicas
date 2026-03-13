@@ -9,7 +9,7 @@ _TAG = ["Consultas"]
 
 @extend_schema_view(
     list=extend_schema(
-        summary="Listar consultas (suporta ?professional=<uuid>)", 
+        summary="Listar consultas (suporta ?professional=<uuid>)",
         tags=_TAG
     ),
     create=extend_schema(summary="Agendar consulta", tags=_TAG),

@@ -76,7 +76,12 @@ DATABASES = {
 }
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "UserAttributeSimilarityValidator"
+        )
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -122,14 +127,17 @@ CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", cast=Csv(), default="")
 # ─── drf-spectacular (OpenAPI) ────────────────────────────────────────────────
 SPECTACULAR_SETTINGS = {
     "TITLE": "API Gerenciamento de Consultas Médicas",
-    "DESCRIPTION": "API RESTful para gestão de profissionais de saúde e consultas médicas.",
+    "DESCRIPTION": (
+        "API RESTful para gestão de profissionais "
+        "de saúde e consultas médicas."
+    ),
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "TAGS": [
         {"name": "Autenticação", "description": "Obtenção e renovação de tokens JWT"},
         {"name": "Profissionais", "description": "CRUD de profissionais de saúde"},
         {
-            "name": "Consultas", 
+            "name": "Consultas",
             "description": "CRUD de consultas. Filtre com `?professional=<uuid>`"
         },
     ],
@@ -141,7 +149,10 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
-            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "format": (
+                "{levelname} {asctime} {module} "
+                "{process:d} {thread:d} {message}"
+            ),
             "style": "{",
         },
     },

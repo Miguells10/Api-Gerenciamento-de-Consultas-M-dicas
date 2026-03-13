@@ -13,12 +13,12 @@ class AccessLogMiddleware:
 
     def __call__(self, request):
         start_time = time.time()
-        
+
         response = self.get_response(request)
-        
+
         duration = time.time() - start_time
         user = request.user if request.user.is_authenticated else "Anonymous"
-        
+
         log_data = {
             "method": request.method,
             "path": request.get_full_path(),
@@ -27,12 +27,12 @@ class AccessLogMiddleware:
             "duration": f"{duration:.3f}s",
             "ip": self.get_client_ip(request),
         }
-        
+
         logger.info(
             f"{log_data['method']} {log_data['path']} - {log_data['status_code']} "
             f"({log_data['user']}) from {log_data['ip']} took {log_data['duration']}"
         )
-        
+
         return response
 
     def get_client_ip(self, request):
