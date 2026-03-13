@@ -1,6 +1,5 @@
 import logging
 import uuid
-from datetime import datetime
 
 logger = logging.getLogger("apps.appointments")
 

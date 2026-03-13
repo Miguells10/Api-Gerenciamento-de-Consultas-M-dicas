@@ -19,10 +19,23 @@ class Migration(migrations.Migration):
             fields=[
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ('id', models.UUIDField(
+                    default=uuid.uuid4, editable=False, 
+                    primary_key=True, serialize=False
+                )),
                 ('date', models.DateTimeField()),
-                ('status', models.CharField(choices=[('SCHEDULED', 'Scheduled'), ('COMPLETED', 'Completed'), ('CANCELED', 'Canceled')], default='SCHEDULED', max_length=20)),
-                ('professional', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='appointments', to='professionals.professional')),
+                ('status', models.CharField(
+                    choices=[
+                        ('SCHEDULED', 'Scheduled'), 
+                        ('COMPLETED', 'Completed'), 
+                        ('CANCELED', 'Canceled')
+                    ], 
+                    default='SCHEDULED', max_length=20
+                )),
+                ('professional', models.ForeignKey(
+                    on_delete=django.db.models.deletion.PROTECT, 
+                    related_name='appointments', to='professionals.professional'
+                )),
             ],
             options={
                 'verbose_name': 'Appointment',

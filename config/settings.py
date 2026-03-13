@@ -107,8 +107,12 @@ REST_FRAMEWORK = {
 
 # ─── JWT ─────────────────────────────────────────────────────────────────────
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(seconds=config("ACCESS_TOKEN_LIFETIME", default=3600, cast=int)),
-    "REFRESH_TOKEN_LIFETIME": timedelta(seconds=config("REFRESH_TOKEN_LIFETIME", default=86400, cast=int)),
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        seconds=config("ACCESS_TOKEN_LIFETIME", default=3600, cast=int)
+    ),
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        seconds=config("REFRESH_TOKEN_LIFETIME", default=86400, cast=int)
+    ),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
@@ -124,7 +128,10 @@ SPECTACULAR_SETTINGS = {
     "TAGS": [
         {"name": "Autenticação", "description": "Obtenção e renovação de tokens JWT"},
         {"name": "Profissionais", "description": "CRUD de profissionais de saúde"},
-        {"name": "Consultas", "description": "CRUD de consultas médicas. Filtre por profissional com `?professional=<uuid>`"},
+        {
+            "name": "Consultas", 
+            "description": "CRUD de consultas. Filtre com `?professional=<uuid>`"
+        },
     ],
 }
 

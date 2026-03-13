@@ -1,5 +1,6 @@
 from django.urls import reverse
 from django.utils import timezone
+import uuid
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
@@ -19,7 +20,9 @@ class AppointmentAPITestCase(APITestCase):
             contact="+1-212-970-4133",
         )
         self.list_url = reverse("appointment-list")
-        self.future_date = (timezone.now() + timezone.timedelta(days=7)).replace(microsecond=0)
+        self.future_date = (
+            timezone.now() + timezone.timedelta(days=7)
+        ).replace(microsecond=0)
         self.valid_payload = {
             "professional": str(self.professional.id),
             "date": self.future_date.isoformat(),
@@ -54,7 +57,10 @@ class AppointmentAPITestCase(APITestCase):
         )
         response = self.client.get(self.list_url, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"] if "results" in response.data else response.data), 1)
+        self.assertEqual(
+            len(response.data["results"] if "results" in response.data else response.data),
+            1
+        )
 
     def test_retrieve_appointment(self):
         appointment = Appointment.objects.create(

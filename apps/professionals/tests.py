@@ -55,7 +55,10 @@ class ProfessionalAPITestCase(APITestCase):
         Professional.objects.create(**self.valid_payload)
         response = self.client.get(self.list_url, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"] if "results" in response.data else response.data), 1)
+        self.assertEqual(
+            len(response.data["results"] if "results" in response.data else response.data), 
+            1
+        )
 
     def test_retrieve_professional(self):
         """Test retrieving a single professional."""

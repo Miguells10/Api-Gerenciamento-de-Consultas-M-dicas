@@ -25,8 +25,7 @@ pytest-django = "^4.8"
 factory-boy = "^3.3"
 coverage = "^7.5"
 
-[tool.ruff]
-line-length = 88
+[tool.ruff.lint]
 select = ["E", "F", "I", "N", "W"]
 
 [tool.black]
