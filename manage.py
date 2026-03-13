@@ -11,7 +11,8 @@ def main() -> None:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
         raise ImportError(
-            "Django not found. Make sure it is installed and the virtual environment is active."
+            "Django not found. Make sure it is installed and the virtual environment "
+            "is active."
         ) from exc
     execute_from_command_line(sys.argv)
 

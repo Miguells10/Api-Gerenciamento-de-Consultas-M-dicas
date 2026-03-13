@@ -21,7 +21,9 @@ from .models import Appointment
             description="Exemplo completo para o POST (data deve ser no futuro).",
             value={
                 "professional": "123e4567-e89b-12d3-a456-426614174000",
-                "date": (timezone.now() + timezone.timedelta(days=7)).replace(microsecond=0).isoformat(),
+                "date": (timezone.now() + timezone.timedelta(days=7))
+                .replace(microsecond=0)
+                .isoformat(),
             },
             request_only=True,
         ),
@@ -54,5 +56,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
 
     def validate_date(self, value: timezone.datetime) -> timezone.datetime:
         if self.instance is None and value <= timezone.now():
-            raise serializers.ValidationError("A data da consulta deve ser uma data futura.")
+            raise serializers.ValidationError(
+                "A data da consulta deve ser uma data futura."
+            )
         return value
