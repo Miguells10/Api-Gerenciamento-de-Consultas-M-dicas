@@ -3,6 +3,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from apps.appointments.models import Appointment
+
 from .models import Professional
 
 
@@ -96,3 +98,38 @@ class ProfessionalAPITestCase(APITestCase):
         self.client.force_authenticate(user=None)
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_create_professional_duplicate_name(self):
+        """Test that creating a professional with a duplicate social_name fails."""
+        Professional.objects.create(**self.valid_payload)
+        payload = self.valid_payload.copy()
+        payload["contact"] = "+1-555-0000"  # Different contact, same name
+        response = self.client.post(self.list_url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("social_name", response.data)
+
+    def test_create_professional_duplicate_contact(self):
+        """Test that creating a professional with a duplicate contact fails."""
+        Professional.objects.create(**self.valid_payload)
+        payload = self.valid_payload.copy()
+        payload["social_name"] = "Dr. Wilson"  # Different name, same contact
+        response = self.client.post(self.list_url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("contact", response.data)
+
+    def test_delete_professional_with_appointments_error(self):
+        """Test custom error message when deleting a professional with appointments."""
+        professional = Professional.objects.create(**self.valid_payload)
+        from django.utils import timezone
+
+        Appointment.objects.create(
+            professional=professional, date=timezone.now() + timezone.timedelta(days=1)
+        )
+        url = reverse("professional-detail", args=[professional.id])
+        response = self.client.delete(url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data["detail"],
+            "Não é possível remover este profissional pois "
+            "ele possui consultas agendadas.",
+        )

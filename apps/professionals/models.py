@@ -7,10 +7,10 @@ from apps.core.models import TimestampedModel
 
 class Professional(TimestampedModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    social_name = models.CharField(max_length=255)
+    social_name = models.CharField(max_length=255, unique=True)
     profession = models.CharField(max_length=100)
     address = models.TextField()
-    contact = models.CharField(max_length=50)
+    contact = models.CharField(max_length=50, unique=True)
 
     class Meta:
         ordering = ["social_name"]

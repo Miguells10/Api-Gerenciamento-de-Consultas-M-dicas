@@ -1,4 +1,7 @@
+from django.db.models import ProtectedError
 from drf_spectacular.utils import extend_schema, extend_schema_view
+from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from .models import Professional
@@ -18,3 +21,20 @@ _TAG = ["Profissionais"]
 class ProfessionalViewSet(ModelViewSet):
     queryset = Professional.objects.all()
     serializer_class = ProfessionalSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Custom destroy to handle ProtectedError when a professional has appointments.
+        """
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError:
+            return Response(
+                {
+                    "detail": (
+                        "Não é possível remover este profissional pois "
+                        "ele possui consultas agendadas."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
