@@ -66,6 +66,14 @@ jobs:
                 sudo usermod -aG docker ubuntu
             fi
 
+            if ! sudo swapon --show | grep -q '/swapfile'; then
+                sudo fallocate -l 1G /swapfile
+                sudo chmod 600 /swapfile
+                sudo mkswap /swapfile
+                sudo swapon /swapfile
+                echo '/swapfile none swap sw 0 0' | sudo tee -a /fstab
+            fi
+
             # Clona o repositório se não existir, e ENTRA na pasta
             if [ ! -d "Api-Gerenciamento-de-Consultas-Medicas" ]; then
                 git clone https://github.com/Miguells10/Api-Gerenciamento-de-Consultas-Medicas.git
