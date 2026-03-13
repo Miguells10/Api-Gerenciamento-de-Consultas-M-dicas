@@ -67,14 +67,13 @@ jobs:
             fi
 
             if ! sudo swapon --show | grep -q '/swapfile'; then
-                sudo fallocate -l 1G /swapfile
+                sudo fallocate -l 1G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=1024
                 sudo chmod 600 /swapfile
                 sudo mkswap /swapfile
                 sudo swapon /swapfile
-                echo '/swapfile none swap sw 0 0' | sudo tee -a /fstab
+                echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
             fi
 
-            # Clona o repositório se não existir, e ENTRA na pasta
             if [ ! -d "Api-Gerenciamento-de-Consultas-Medicas" ]; then
                 git clone https://github.com/Miguells10/Api-Gerenciamento-de-Consultas-Medicas.git
             fi
@@ -92,7 +91,7 @@ jobs:
             echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
             echo "CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}" >> .env
             echo "ACCESS_TOKEN_LIFETIME=${{ secrets.ACCESS_TOKEN_LIFETIME }}" >> .env
-            echo "REFRESH_TOKEN_LIFETIME=${{ secrets.REFRESH_TOKEN_LIFETIME }}"
+            echo "REFRESH_TOKEN_LIFETIME=${{ secrets.REFRESH_TOKEN_LIFETIME }}" >> .env
             sudo docker compose down -v || true
             sudo docker compose up -d --build
             
