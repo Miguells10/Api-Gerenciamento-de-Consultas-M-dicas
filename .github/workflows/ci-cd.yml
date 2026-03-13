@@ -93,6 +93,7 @@ jobs:
             echo "ACCESS_TOKEN_LIFETIME=${{ secrets.ACCESS_TOKEN_LIFETIME }}" >> .env
             echo "REFRESH_TOKEN_LIFETIME=${{ secrets.REFRESH_TOKEN_LIFETIME }}" >> .env
             sudo docker compose down -v || true
+            sudo docker volume rm api-gerenciamento-de-consultas-medicas_postgres_data || true
             sudo docker compose up -d --build
             
             sudo docker compose exec -T web python manage.py migrate
