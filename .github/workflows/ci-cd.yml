@@ -60,11 +60,16 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd Api-Gerenciamento-de-Consultas-M-dicas || (git clone https://github.com/Miguells10/Api-Gerenciamento-de-Consultas-M-dicas.git && cd Api-Gerenciamento-de-Consultas-M-dicas)
-            git config --global --add safe.directory /home/${{ secrets.EC2_USERNAME }}/Api-Gerenciamento-de-Consultas-M-dicas
+            if ! command -v docker &> /dev/null; then
+                sudo apt-get update
+                sudo apt-get install -y docker.io docker-compose-v2 git
+                sudo usermod -aG docker ubuntu
+            fi
+
+            cd Api-Gerenciamento-de-Consultas-Medicas || (git clone https://github.com/Miguells10/Api-Gerenciamento-de-Consultas-Medicas.git && cd Api-Gerenciamento-de-Consultas-Medicas)
+            git config --global --add safe.directory /home/${{ secrets.EC2_USERNAME }}/Api-Gerenciamento-de-Consultas-Medicas
             git pull origin master
             
-            # Create .env from secrets (Ensuring secure config on server)
             echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > .env
             echo "DEBUG=False" >> .env
             echo "ALLOWED_HOSTS=${{ secrets.EC2_HOST }},localhost,127.0.0.1" >> .env
@@ -76,9 +81,7 @@ jobs:
             echo "ACCESS_TOKEN_LIFETIME=${{ secrets.ACCESS_TOKEN_LIFETIME }}" >> .env
             echo "REFRESH_TOKEN_LIFETIME=${{ secrets.REFRESH_TOKEN_LIFETIME }}" >> .env
             
-            # Rebuild and restart services
-            docker compose down
-            docker compose up -d --build
+            sudo docker compose down || true
+            sudo docker compose up -d --build
             
-            # Apply any pending migrations
-            docker compose exec -T web python manage.py migrate
+            sudo docker compose exec -T web python manage.py migrate
