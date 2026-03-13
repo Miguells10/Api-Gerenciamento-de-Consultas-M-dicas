@@ -78,8 +78,7 @@ DATABASES = {
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": (
-            "django.contrib.auth.password_validation."
-            "UserAttributeSimilarityValidator"
+            "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
         )
     },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -128,8 +127,7 @@ CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", cast=Csv(), default="")
 SPECTACULAR_SETTINGS = {
     "TITLE": "API Gerenciamento de Consultas Médicas",
     "DESCRIPTION": (
-        "API RESTful para gestão de profissionais "
-        "de saúde e consultas médicas."
+        "API RESTful para gestão de profissionais de saúde e consultas médicas."
     ),
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
@@ -138,7 +136,7 @@ SPECTACULAR_SETTINGS = {
         {"name": "Profissionais", "description": "CRUD de profissionais de saúde"},
         {
             "name": "Consultas",
-            "description": "CRUD de consultas. Filtre com `?professional=<uuid>`"
+            "description": "CRUD de consultas. Filtre com `?professional=<uuid>`",
         },
     ],
 }
@@ -150,8 +148,7 @@ LOGGING = {
     "formatters": {
         "verbose": {
             "format": (
-                "{levelname} {asctime} {module} "
-                "{process:d} {thread:d} {message}"
+                "{levelname} {asctime} {module} {process:d} {thread:d} {message}"
             ),
             "style": "{",
         },

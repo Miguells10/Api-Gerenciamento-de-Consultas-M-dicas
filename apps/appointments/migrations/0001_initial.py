@@ -7,41 +7,53 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('professionals', '0001_initial'),
+        ("professionals", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Appointment',
+            name="Appointment",
             fields=[
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('id', models.UUIDField(
-                    default=uuid.uuid4, editable=False,
-                    primary_key=True, serialize=False
-                )),
-                ('date', models.DateTimeField()),
-                ('status', models.CharField(
-                    choices=[
-                        ('SCHEDULED', 'Scheduled'),
-                        ('COMPLETED', 'Completed'),
-                        ('CANCELED', 'Canceled')
-                    ],
-                    default='SCHEDULED', max_length=20
-                )),
-                ('professional', models.ForeignKey(
-                    on_delete=django.db.models.deletion.PROTECT,
-                    related_name='appointments', to='professionals.professional'
-                )),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("date", models.DateTimeField()),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("SCHEDULED", "Scheduled"),
+                            ("COMPLETED", "Completed"),
+                            ("CANCELED", "Canceled"),
+                        ],
+                        default="SCHEDULED",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "professional",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="appointments",
+                        to="professionals.professional",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Appointment',
-                'verbose_name_plural': 'Appointments',
-                'ordering': ['date'],
+                "verbose_name": "Appointment",
+                "verbose_name_plural": "Appointments",
+                "ordering": ["date"],
             },
         ),
     ]

@@ -6,31 +6,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Professional',
+            name="Professional",
             fields=[
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('id', models.UUIDField(
-                    default=uuid.uuid4, editable=False,
-                    primary_key=True, serialize=False
-                )),
-                ('social_name', models.CharField(max_length=255)),
-                ('profession', models.CharField(max_length=100)),
-                ('address', models.TextField()),
-                ('contact', models.CharField(max_length=50)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("social_name", models.CharField(max_length=255)),
+                ("profession", models.CharField(max_length=100)),
+                ("address", models.TextField()),
+                ("contact", models.CharField(max_length=50)),
             ],
             options={
-                'verbose_name': 'Professional',
-                'verbose_name_plural': 'Professionals',
-                'ordering': ['social_name'],
+                "verbose_name": "Professional",
+                "verbose_name_plural": "Professionals",
+                "ordering": ["social_name"],
             },
         ),
     ]

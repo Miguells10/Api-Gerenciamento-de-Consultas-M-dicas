@@ -22,9 +22,9 @@ class AppointmentAPITestCase(APITestCase):
             contact="+1-212-970-4133",
         )
         self.list_url = reverse("appointment-list")
-        self.future_date = (
-            timezone.now() + timezone.timedelta(days=7)
-        ).replace(microsecond=0)
+        self.future_date = (timezone.now() + timezone.timedelta(days=7)).replace(
+            microsecond=0
+        )
         self.valid_payload = {
             "professional": str(self.professional.id),
             "date": self.future_date.isoformat(),
@@ -54,8 +54,7 @@ class AppointmentAPITestCase(APITestCase):
 
     def test_list_appointments(self):
         Appointment.objects.create(
-            professional=self.professional,
-            date=self.future_date
+            professional=self.professional, date=self.future_date
         )
         response = self.client.get(self.list_url, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -65,13 +64,12 @@ class AppointmentAPITestCase(APITestCase):
                 if "results" in response.data
                 else response.data
             ),
-            1
+            1,
         )
 
     def test_retrieve_appointment(self):
         appointment = Appointment.objects.create(
-            professional=self.professional,
-            date=self.future_date
+            professional=self.professional, date=self.future_date
         )
         url = reverse("appointment-detail", args=[appointment.id])
         response = self.client.get(url, format="json")
@@ -80,8 +78,7 @@ class AppointmentAPITestCase(APITestCase):
 
     def test_update_appointment_status(self):
         appointment = Appointment.objects.create(
-            professional=self.professional,
-            date=self.future_date
+            professional=self.professional, date=self.future_date
         )
         url = reverse("appointment-detail", args=[appointment.id])
         payload = {"status": AppointmentStatus.COMPLETED}
@@ -92,8 +89,7 @@ class AppointmentAPITestCase(APITestCase):
 
     def test_delete_appointment(self):
         appointment = Appointment.objects.create(
-            professional=self.professional,
-            date=self.future_date
+            professional=self.professional, date=self.future_date
         )
         url = reverse("appointment-detail", args=[appointment.id])
         response = self.client.delete(url, format="json")
@@ -102,10 +98,10 @@ class AppointmentAPITestCase(APITestCase):
 
     def test_professional_protection(self):
         Appointment.objects.create(
-            professional=self.professional,
-            date=self.future_date
+            professional=self.professional, date=self.future_date
         )
         from django.db.models import ProtectedError
+
         with self.assertRaises(ProtectedError):
             self.professional.delete()
 

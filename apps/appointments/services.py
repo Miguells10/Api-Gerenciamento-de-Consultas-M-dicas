@@ -3,6 +3,7 @@ import uuid
 
 logger = logging.getLogger("apps.appointments")
 
+
 class AsaasService:
     """
     Service to handle integration with Asaas Payment Gateway.
@@ -25,9 +26,9 @@ class AsaasService:
             "netValue": 135.00,
             "split": [
                 {"walletId": "platform_wallet", "fixedValue": 15.00},
-                {"walletId": "professional_wallet", "percentualValue": 90.0}
+                {"walletId": "professional_wallet", "percentualValue": 90.0},
             ],
-            "invoiceUrl": f"https://sandbox.asaas.com/i/{uuid.uuid4().hex[:8]}"
+            "invoiceUrl": f"https://sandbox.asaas.com/i/{uuid.uuid4().hex[:8]}",
         }
 
         return mock_response

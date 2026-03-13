@@ -3,11 +3,13 @@ import time
 
 logger = logging.getLogger("apps.access")
 
+
 class AccessLogMiddleware:
     """
     Middleware to log every request made to the API.
     Logs method, path, status code, user, and duration.
     """
+
     def __init__(self, get_response):
         self.get_response = get_response
 

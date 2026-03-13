@@ -61,7 +61,7 @@ class ProfessionalAPITestCase(APITestCase):
                 if "results" in response.data
                 else response.data
             ),
-            1
+            1,
         )
 
     def test_retrieve_professional(self):
