@@ -1,8 +1,3 @@
-"""
-JWT auth URL configuration.
-Exposes token obtain and refresh endpoints.
-"""
-
 from django.urls import path
 
 from .views import CustomTokenObtainPairView, CustomTokenRefreshView

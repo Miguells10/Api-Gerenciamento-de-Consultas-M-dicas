@@ -1,8 +1,3 @@
-"""
-Professional model — represents a health professional entity.
-UUID primary key prevents enumeration attacks.
-"""
-
 import uuid
 
 from django.db import models

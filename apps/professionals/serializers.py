@@ -1,8 +1,3 @@
-"""
-Serializer for the Professional model.
-Validates: social_name non-empty, contact format.
-"""
-
 from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
 

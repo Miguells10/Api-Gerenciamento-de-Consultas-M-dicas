@@ -1,8 +1,3 @@
-"""
-ViewSet for Professional — provides list, create, retrieve, update, destroy.
-All responses are JSON (enforced by DRF settings).
-"""
-
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.viewsets import ModelViewSet
 

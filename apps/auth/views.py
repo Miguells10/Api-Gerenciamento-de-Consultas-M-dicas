@@ -1,7 +1,3 @@
-"""
-Custom JWT auth views to allow extending the OpenAPI schema with drf-spectacular.
-"""
-
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 

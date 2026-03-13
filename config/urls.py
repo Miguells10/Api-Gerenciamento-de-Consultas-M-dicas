@@ -1,7 +1,3 @@
-"""
-Root URL configuration. All API routes are versioned under /api/v1/.
-"""
-
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView

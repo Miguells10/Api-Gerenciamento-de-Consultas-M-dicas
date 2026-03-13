@@ -1,8 +1,3 @@
-"""
-Appointment model — links a health professional to a scheduled date.
-PROTECT prevents deleting a professional who has appointments.
-"""
-
 import uuid
 
 from django.db import models

@@ -1,9 +1,3 @@
-"""
-ViewSet for Appointment — provides list, create, retrieve, update, destroy.
-Supports filtering by professional via ?professional=<uuid>.
-select_related("professional") prevents N+1 queries on list/retrieve.
-"""
-
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.viewsets import ModelViewSet
 
