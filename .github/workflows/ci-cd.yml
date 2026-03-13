@@ -66,7 +66,12 @@ jobs:
                 sudo usermod -aG docker ubuntu
             fi
 
-            cd Api-Gerenciamento-de-Consultas-Medicas || (git clone https://github.com/Miguells10/Api-Gerenciamento-de-Consultas-Medicas.git && cd Api-Gerenciamento-de-Consultas-Medicas)
+            # Clona o repositório se não existir, e ENTRA na pasta
+            if [ ! -d "Api-Gerenciamento-de-Consultas-Medicas" ]; then
+                git clone https://github.com/Miguells10/Api-Gerenciamento-de-Consultas-Medicas.git
+            fi
+            cd Api-Gerenciamento-de-Consultas-Medicas
+            
             git config --global --add safe.directory /home/${{ secrets.EC2_USERNAME }}/Api-Gerenciamento-de-Consultas-Medicas
             git pull origin master
             
