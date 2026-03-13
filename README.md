@@ -28,6 +28,18 @@ Esta API foi desenvolvida com **Python + Django + Django REST Framework (DRF)**,
 
 ---
 
+## 🌐 Link de Acesso (Live API)
+
+O projeto está implantado na **AWS EC2** com deploy automatizado:
+
+- **Swagger UI (Documentação):** [https://54.205.4.26/api/docs/](https://54.205.4.26/api/docs/)
+- **API Host:** `https://54.205.4.26`
+
+> [!IMPORTANT]
+> A API utiliza certificados SSL e autenticação JWT. Para testar os endpoints via Swagger, obtenha o token no endpoint `/api/v1/auth/token/`.
+
+---
+
 ## ✅ Pré-requisitos
 
 - [Python 3.12+](https://python.org)
