@@ -1,7 +1,7 @@
+from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from django.contrib.auth.models import User
 
 from .models import Professional
 
@@ -55,7 +55,14 @@ class ProfessionalAPITestCase(APITestCase):
         Professional.objects.create(**self.valid_payload)
         response = self.client.get(self.list_url, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"] if "results" in response.data else response.data), 1)
+        self.assertEqual(
+            len(
+                response.data["results"]
+                if "results" in response.data
+                else response.data
+            ),
+            1,
+        )
 
     def test_retrieve_professional(self):
         """Test retrieving a single professional."""
@@ -83,3 +90,9 @@ class ProfessionalAPITestCase(APITestCase):
         response = self.client.delete(url, format="json")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Professional.objects.count(), 0)
+
+    def test_unauthenticated_access(self):
+        """Test that unauthenticated users cannot list professionals."""
+        self.client.force_authenticate(user=None)
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

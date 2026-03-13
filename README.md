@@ -225,6 +225,10 @@ poetry run python manage.py test --verbosity=2
 
 # Docker
 docker compose exec web python manage.py test --verbosity=2
+
+# Lint e Formatação (Ruff)
+py -m ruff check .   # Verificar erros
+py -m ruff format .  # Ajustar formatação (estilo Black)
 ```
 
 ### Executar com cobertura de código
@@ -252,15 +256,32 @@ poetry run coverage html  # Gera relatório HTML em htmlcov/
 
 ---
 
-## 🔄 Estratégia de Rollback (Blue/Green)
+### 📦 GitHub Secrets Sugeridas
 
-O pipeline de CI/CD implementa **Blue/Green Deployment** no AWS ECS:
+Para o funcionamento do pipeline de deploy, configure as seguintes Secrets no repositório:
 
-1. O novo código (`Green`) é implantado como nova task definition
-2. Health checks validam que o ambiente Green está saudável
-3. O tráfego é transferido do `Blue` para o `Green`
-4. Em caso de falha → tráfego volta automaticamente para `Blue`
-5. Para rollback manual: re-execute o workflow da tag/commit anterior no GitHub Actions
+| Secret | Descrição |
+|---|---|
+| `EC2_HOST` | IP ou Host do servidor (Staging/Prod) |
+| `EC2_USERNAME` | Usuário SSH (ex: ubuntu) |
+| `EC2_SSH_KEY` | Chave privada SSH (.pem) |
+| `POSTGRES_DB` | Nome do banco de dados |
+| `POSTGRES_USER` | Usuário do banco |
+| `POSTGRES_PASSWORD` | Senha do banco |
+| `SECRET_KEY` | Django Secret Key |
+
+---
+
+## 🔄 Estratégia de Rollback
+
+O pipeline de CI/CD foi desenhado para facilitar a recuperação em caso de erros:
+
+1. **Rollback Automático**: Caso o deploy falhe ou o container não suba (erro no `docker compose up`), o script de deploy interrompe a execução.
+2. **Rollback Manual**: Para voltar a uma versão anterior que estava estável:
+   - Acesse o **GitHub Actions**.
+   - Selecione a "Run" de um commit que você sabe que estava funcionando.
+   - Clique em **Re-run all jobs** (isso fará o deploy daquela versão específica novamente sobre a atual).
+3. **Persistência**: Como os dados do PostgreSQL estão em um volume Docker, o rollback do código não afeta a integridade das consultas já cadastradas (a menos que haja uma incompatibilidade crítica de schema).
 
 ---
 

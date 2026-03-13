@@ -39,6 +39,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.core.middleware.AccessLogMiddleware",  # Access logs
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -75,7 +76,11 @@ DATABASES = {
 }
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+        )
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -106,8 +111,12 @@ REST_FRAMEWORK = {
 
 # ─── JWT ─────────────────────────────────────────────────────────────────────
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(seconds=config("ACCESS_TOKEN_LIFETIME", default=3600, cast=int)),
-    "REFRESH_TOKEN_LIFETIME": timedelta(seconds=config("REFRESH_TOKEN_LIFETIME", default=86400, cast=int)),
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        seconds=config("ACCESS_TOKEN_LIFETIME", default=3600, cast=int)
+    ),
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        seconds=config("REFRESH_TOKEN_LIFETIME", default=86400, cast=int)
+    ),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
@@ -117,13 +126,18 @@ CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", cast=Csv(), default="")
 # ─── drf-spectacular (OpenAPI) ────────────────────────────────────────────────
 SPECTACULAR_SETTINGS = {
     "TITLE": "API Gerenciamento de Consultas Médicas",
-    "DESCRIPTION": "API RESTful para gestão de profissionais de saúde e consultas médicas.",
+    "DESCRIPTION": (
+        "API RESTful para gestão de profissionais de saúde e consultas médicas."
+    ),
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "TAGS": [
         {"name": "Autenticação", "description": "Obtenção e renovação de tokens JWT"},
         {"name": "Profissionais", "description": "CRUD de profissionais de saúde"},
-        {"name": "Consultas", "description": "CRUD de consultas médicas. Filtre por profissional com `?professional=<uuid>`"},
+        {
+            "name": "Consultas",
+            "description": "CRUD de consultas. Filtre com `?professional=<uuid>`",
+        },
     ],
 }
 
@@ -133,7 +147,9 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
-            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "format": (
+                "{levelname} {asctime} {module} {process:d} {thread:d} {message}"
+            ),
             "style": "{",
         },
     },
@@ -154,6 +170,11 @@ LOGGING = {
             "propagate": False,
         },
         "apps": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "apps.access": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": False,

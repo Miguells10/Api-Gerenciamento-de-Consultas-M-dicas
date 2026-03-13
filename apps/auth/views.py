@@ -11,8 +11,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     pass
 
 
-@extend_schema_view(
-    post=extend_schema(summary="Renovar token de acesso", tags=_TAG)
-)
+@extend_schema_view(post=extend_schema(summary="Renovar token de acesso", tags=_TAG))
 class CustomTokenRefreshView(TokenRefreshView):
     pass
